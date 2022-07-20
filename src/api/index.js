@@ -11,7 +11,8 @@ const API = {
   GET_VISITOR_INFO: '/visitorQuery/reservationInfo', // 根据访客openID、手机号、身份证号查询访客预约信息
   GET_VISITOR_RESERVAT: '/visitorQuery/visitorReservation', // 访客预约
   GET_AUTHOR_URL: '/author/authUrl', // 获取网页授权code的url
-  GET_AUTHOR_OPENID: '/author/openid' // 根据网页授权code的url获取openId
+  GET_AUTHOR_OPENID: '/wx/userInfo', // 根据网页授权code的url获取openId
+  SENT_CODE: '/member/info/send' // 根据网页授权code的url获取openId
 }
 
 const isDev = process.env.NODE_ENV === 'development'
@@ -21,6 +22,18 @@ Object.keys(API).forEach(key => {
 })
 
 const ApiService = {
+   /**
+   * @description 发送验证码
+   * @param {*} params
+   * @returns
+   */
+    sentCode(params) {
+        return http({
+          method: 'get',
+          url: API.SENT_CODE+'/'+params,
+          
+        })
+    },
   /**
    * @description 人员登记页面信息提交
    * @param {*} opts
@@ -155,15 +168,15 @@ const ApiService = {
    * @returns
    */
   getWxTokenApi(params) {
-    if (isDev) {
-      return Promise.resolve(WxToken)
-    } else {
+    // if (isDev) {
+    //   return Promise.resolve(WxToken)
+    // } else {
       return http({
         method: 'get',
         url: API.GET_AUTHOR_OPENID,
         params
       })
-    }
+    // }
   }
 }
 

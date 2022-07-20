@@ -15,7 +15,7 @@ class WechatAuthPlugin {
   constructor() {
     this.appid = null
     this.redirect_uri = null
-    this._scope = SCOPES[0] // 授权类型，默认使用静默授权
+    this._scope = SCOPES[1] // 授权类型，默认使用静默授权
     this._code = null
     this._redirect_uri = null
   }

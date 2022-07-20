@@ -1,7 +1,7 @@
 export default [
   {
     path: '/',
-    redirect: '/visitorList'
+    redirect: '/inviteVisitor'
   },
   {
     path: '/error/:type',

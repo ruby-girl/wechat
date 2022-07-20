@@ -13,7 +13,7 @@ import { CONFIG_STORAGE } from '@/utils/configs'
 import API from '@/api'
 
 // 设置APPID
-const WX_APPID = 'wx12345677654321'
+const WX_APPID = 'wxe3c11c4385c75914'
 wechatAuth.setAppId(WX_APPID)
 
 router.beforeEach(async (to, from, next) => {
@@ -35,7 +35,7 @@ router.beforeEach(async (to, from, next) => {
       // 获取code值
       wechatAuth.returnFromWechat(window.location.href)
       const code = wechatAuth.code
-      console.log(code)
+      console.log('~~~~~~~~~~~~~code===',code)
       // 判断code是否存在
       if (!code) {
         setStore(CONFIG_STORAGE.AuthStatusKey, 0)
@@ -46,7 +46,8 @@ router.beforeEach(async (to, from, next) => {
       }
       API.getWxTokenApi(params)
         .then(res => {
-          if (res.code === '0') {
+          console.info('获取opendid==',res)
+          if (res.code ==200) {
             // 获取openId之后存储，并将状态更改为2
             setStore(CONFIG_STORAGE.openId, res.data)
             setStore(CONFIG_STORAGE.AuthStatusKey, 2)

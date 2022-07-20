@@ -40,12 +40,13 @@ module.exports = {
     // },
     proxy: {
       '^/dev/': {
-        target: 'http://100.195.229.175:8080/',
+        target: 'http://488e7c05.cpolar.io/',
         changeOrigin: true,
         pathRewrite: {
           '/dev': '/' + process.env.VUE_APP_CONTEXT
         }
       }
-    }
+    },
+    disableHostCheck: false,
   }
 }
