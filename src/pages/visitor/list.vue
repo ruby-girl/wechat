@@ -1,32 +1,6 @@
 <template>
   <layout>
-    <template v-if="false" slot="nav-right">
-      <div class="nav-right">
-        <van-popover v-model="showPopover" theme="dark" trigger="click" :actions="actions" @select="onSelect" placement="bottom-end">
-          <template #reference>
-            <van-icon name="filter-o" />
-          </template>
-        </van-popover>
-      </div>
-    </template>
-    <div ref="visitorList" class="visitorList">
-      <div class="visitorList-list">
-        <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
-          <van-cell v-for="(item, index) in visitorList" :key="index" is-link center @click="goToDetail(item)">
-            <div class="name">{{ isVisitor ? item.personname : item.visitorname || '未知' }}</div>
-            <div class="phone">{{ isVisitor ? phoneDeal(item.phoneno) : phoneDeal(item.visitorphone) }}</div>
-            <div class="phone">{{ item.visittime | timeFormat }}</div>
-            <div :class="['status', statusClass(item.status)]">
-              {{ item.status | statusFormat }}
-            </div>
-          </van-cell>
-        </van-list>
-      </div>
-    </div>
-    <div class="visitor-btn">
-      <van-button v-if="!isRegister" round block type="info" @click="goRegister">去登记</van-button>
-      <van-button v-else-if="isVisitor" round block type="info" @click="makeAppointment">去预约</van-button>
-    </div>
+   
   </layout>
 </template>
 
@@ -38,73 +12,24 @@ import { getStore } from '@/utils/util'
 export default {
   data() {
     return {
-      openid: getStore(CONFIG_STORAGE.openId), // 访问者openId
-      isRegister: false, // 是否登记过，登记过展示去预约，未登记展示去登记
-      isVisitor: true, // 是否是访客,加载访客或者
-      jobNo: '',
-      container: null,
-      showPopover: false,
-      actions: [
-        { text: '全部', value: -1 },
-        { text: '待审核', value: 0 },
-        { text: '已通过', value: 1 },
-        { text: '未通过', value: 2 },
-        { text: '已过期', value: 3 }
-      ],
-      currentStatus: -1,
-      searchValue: '',
-      visitorList: [],
-      loading: false,
-      finished: false,
-      pageNo: 1,
-      pageSize: 20
+     
     }
   },
   components: {
     layout
   },
   created() {
-    this.queryPersonsInfo()
-  },
-  methods: {
-    /**
-     * @description 根据openid查询人员类型
-     */
-    queryPersonsInfo() {
-      const data = {
-        openid: this.openid
+    API.checkMemeberOpenId({ openId: getStore(CONFIG_STORAGE.openId) }).then(res => {
+      if (res.code == '200') {
+        this.$router.push({
+          path: `/visitorDetail`
+        })
+      }else{
+        this.$router.push({
+          path: `/inviteVisitor`
+        })
       }
-      API.queryPersonsInfoApi(data).then(res => {
-        console.log(res)
-        if (res.code === '0') {
-          if (res.data) {
-            this.isRegister = true
-            this.isVisitor = res.data.persontype === '1'
-          } else {
-            this.isRegister = false
-          }
-        }
-      })
-    },
-    /**
-     * @description 点击进入详情
-     */
-    goToDetail(row) {
-      this.$router.push({
-        path: `/visitorDetail/${row.id}`,
-        query: {
-          status: row.status
-        }
-      })
-    },
-    /**
-     * @description 点击进入预约
-     */
-    makeAppointment(row) {
-      this.$router.push({
-        path: '/inviteVisitor'
-      })
-    }
+    })
   }
 }
 </script>

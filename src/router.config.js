@@ -1,7 +1,7 @@
 export default [
   {
     path: '/',
-    redirect: '/inviteVisitor'
+    redirect: '/visitorList'
   },
   {
     path: '/error/:type',
@@ -13,7 +13,7 @@ export default [
     path: '/inviteVisitor',
     menuCode: '001',
     component: 'visitor/index',
-    meta: { menuCode: '001', title: '访客预约' }
+    meta: { menuCode: '001', title: '开卡/绑定' }
   },
   {
     name: 'register',
@@ -23,24 +23,24 @@ export default [
     meta: { menuCode: '005', title: '人员登记' }
   },
   {
-    name: 'inviteSucess',
-    path: '/inviteSucess',
+    name: 'transfer',
+    path: '/transfer',
     menuCode: '004',
-    component: 'visitor/sucess',
-    meta: { menuCode: '004', title: '提交成功' }
+    component: 'visitor/transfer',
+    meta: { menuCode: '004', title: '转账' }
   },
   {
     name: 'visitorList',
     path: '/visitorList',
     menuCode: '002',
     component: 'visitor/list',
-    meta: { menuCode: '002', title: '访客列表' }
+    meta: { menuCode: '002', title: '登录' }
   },
   {
     name: 'visitorDetail',
-    path: '/visitorDetail/:id',
+    path: '/visitorDetail',
     menuCode: '003',
     component: 'visitor/detail',
-    meta: { menuCode: '003', title: '访客详情' }
+    meta: { menuCode: '003', title: '个人中心' }
   }
 ]

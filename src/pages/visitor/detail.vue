@@ -1,244 +1,226 @@
 <template>
-  <layout>
-    <div class="visitorDetail">
-      <!-- 被访问者信息 -->
-      <div class="visitor-card">
-        <div :class="['status', statusClass(status)]">
-          {{ status | statusFormat }}
+  <div class="container-box">
+    <div class="card-box">
+      <div class="card-top display-flex justify-content-flex-justify align-items-center">
+        <div class="top-item">
+          <div>余额</div>
+          <div class="red-txt">¥{{ memberAssetQuantity }}</div>
         </div>
-        <van-field readonly v-model="form.personname" left-icon="friends-o" name="personname" label="被访人姓名" placeholder="被访人姓名" />
-        <van-field readonly v-model="form.jobno" icon-prefix="iconfont" left-icon="zhengjianhaoma" name="jobno" label="被访人工号" placeholder="被访人工号" />
-        <van-field readonly v-model="form.phoneno" left-icon="phone-o" name="phoneno" label="被访人电话" placeholder="被访人电话" />
-        <van-field readonly v-model="form.certificateno" icon-prefix="iconfont" left-icon="zhengjianhaoma" name="certificateno" label="被访人身份证" placeholder="被访人身份证" />
-        <van-field readonly v-model="form.purpose" left-icon="notes-o" name="name" label="来访事由" placeholder="来访事由" />
-        <van-field icon-prefix="iconfont" left-icon="shijian" readonly name="startTime" :value="form.startTime" label="来访时间" placeholder="点击选择时间" />
-        <van-field icon-prefix="iconfont" left-icon="shijian" readonly name="endTime" :value="form.endTime" label="离开时间" placeholder="点击选择时间" />
-      </div>
-      <!-- 访客信息 -->
-      <div class="visitor-card">
-        <van-field readonly v-model="visitorDetail.visitorName" left-icon="user-o" name="visitorName" label="姓名" placeholder="姓名" />
-        <van-field readonly name="visitorSex" label="性别" icon-prefix="iconfont" left-icon="gender">
-          <template #input>
-            <van-radio-group disabled v-model="visitorDetail.visitorSex" direction="horizontal">
-              <van-radio name="1" checked-color="rgba(0, 72, 255, 1)">男</van-radio>
-              <van-radio name="2" checked-color="rgba(0, 72, 255, 1)">女</van-radio>
-            </van-radio-group>
-          </template>
-        </van-field>
-        <van-field readonly v-model="visitorDetail.visitorPhoneNo" left-icon="phone-o" name="visitorPhoneNo" label="访客手机号" placeholder="访客手机号" />
-        <van-field readonly v-model="visitorDetail.visitorIdentityNum" icon-prefix="iconfont" left-icon="zhengjianhaoma" name="visitorIdentityNum" label="身份证号" placeholder="身份证号" />
-        <van-field readonly v-model="visitorDetail.visitorPlateNo" icon-prefix="iconfont" left-icon="cheliang" name="visitorPlateNo" label="车牌号" placeholder="车牌号" />
-        <van-field name="uploader" left-icon="user-circle-o" label="头像">
-          <template #input>
-            <van-image width="80" height="80" :src="visitorphoto" />
-          </template>
-        </van-field>
-      </div>
-      <div class="visitor-btn" v-if="!isVisitor">
-        <van-button :disabled="statusComputed" round block type="info" native-type="button" @click="overlayShow = true">审核</van-button>
-      </div>
-      <van-action-sheet v-model="overlayShow" title="审核">
-        <div class="content">
-          <van-field label="结论">
-            <template #input>
-              <van-radio-group v-model="result" direction="horizontal">
-                <van-radio name="0" checked-color="rgba(0, 72, 255, 1)">通过</van-radio>
-                <van-radio name="1" checked-color="rgba(0, 72, 255, 1)">不通过</van-radio>
-              </van-radio-group>
-            </template>
-          </van-field>
-          <van-field v-model="message" rows="2" autosize label="审核意见" type="textarea" maxlength="50" placeholder="请输入审核意见" show-word-limit />
-          <van-button round block type="info" native-type="button" @click="sure">确定</van-button>
+        <div class="top-center">
+           
+          <van-image round width="65" height="65" :src="memberPicture" />
+          <div>{{ name }}</div>
         </div>
-      </van-action-sheet>
+        <div class="top-item">
+          <!-- <div>余额</div>
+          <div class="red-txt" style="">¥0.11</div> -->
+          <van-button type="info" size="small" @click="transfer">转账</van-button>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <!-- <div class="bottom-txt">895555asdasd</div> -->
+        <div v-if="hasImg">
+          <img :src="barCodeIMg" alt="" class="img-box" srcset="" />
+          <img :src="qrCodeImg" alt="" class="img-box" srcset="" />
+        </div>
+        <div v-else style="margin-bottom: 40px">
+          <van-button round type="primary" @click="getCodeImg" :loading="loading">点击获取二维码</van-button>
+        </div>
+        <div class="bottom-txt">每分钟自动更新，此付款通过余额支付</div>
+        <div class="bottom-txt">支付成功后，刷新页面查看余额</div>
+      </div>
     </div>
-  </layout>
+  </div>
 </template>
 
 <script>
-import layout from '@/layouts/layout'
 import API from '@/api'
 import { CONFIG_STORAGE } from '@/utils/configs'
 import { getStore } from '@/utils/util'
 export default {
   data() {
     return {
-      isVisitor: true, // 是否是访客,非访客展示底部审核按钮
-      visitorId: '',
-      visitBatch: '', // 预约批次号，审批时候提交
-      overlayShow: false,
-      result: '',
-      message: '',
-      status: 0,
-      form: {
-        personname: '',
-        jobno: '',
-        phoneno: '',
-        certificateno: '',
-        startTime: '',
-        endTime: '',
-        purpose: ''
-      },
-      visitorDetail: {
-        visitorName: '', // 姓名
-        visitorSex: '', // 性别
-        visitorPhoneNo: '', // 手机号
-        visitorPlateNo: '', // 车牌号
-        // certificatesType: "身份证", // 证件类型
-        visitorIdentityNum: '' // 证件号码
-      },
-      visitorphoto: '' // 访客头像
+      height: window.innerHeight - 100,
+      memberPicture: '',
+      qrCodeImg: '',
+      barCodeIMg: '',
+      name: '',
+      timer: null,
+      hasImg: false,
+      memberAssetQuantity: '',
+      loading:false
     }
-  },
-  components: {
-    layout
   },
   created() {
-    this.visitorId = this.$route.params.id
-    this.status = Number(this.$route.query.status) || 0
-    this.queryPersonsInfo()
-    this.getDetail()
+    API.wechatInfo({ openId: getStore(CONFIG_STORAGE.openId), accessToken: getStore(CONFIG_STORAGE.accessToken) }).then(res => {
+      this.memberPicture = res.data.memberPicture
+      this.name = res.data.memberName
+      this.memberAssetQuantity = res.data.memberAssetQuantity
+    })
+    this.getCodeImg()
   },
-  computed: {
-    statusComputed() {
-      return this.status !== 0
-    }
+  beforeDestroy() {
+    clearInterval(this.timer)
   },
   methods: {
-    /**
-     * @description 根据openid查询人员类型
-     */
-    queryPersonsInfo() {
-      const data = {
-        openid: getStore(CONFIG_STORAGE.openId)
-      }
-      API.queryPersonsInfoApi(data).then(res => {
-        if (res.code === '0') {
-          if (res.data) {
-            this.isVisitor = res.data.persontype === '1'
-          }
+    getCodeImg() {
+      this.loading=true
+      API.memberCodeImg({ openId: getStore(CONFIG_STORAGE.openId) }).then(res => {
+        this.loading=false
+        if (res.code == '200') {
+          this.qrCodeImg = res.data.qrCodeImg
+          this.barCodeIMg = res.data.barCodeIMg
+          this.hasImg = true
+          let _this = this
+          this.timer = window.setTimeout(() => {
+            _this.hasImg = false
+          }, 10000)
         }
       })
     },
-    /**
-     * @description 获取详情信息
-     */
-    getDetail() {
-      const data = {
-        id: this.visitorId
-      }
-      API.getVisitorDetailApi(data).then(res => {
-        if (res.code === '0') {
-          const _data = res.data
-          this.status = _data.status
-          this.visitBatch = _data.extend3
-          this.visitorphoto = _data.visitorphoto
-          this.form = {
-            personname: _data.personname,
-            jobno: _data.jobno,
-            phoneno: _data.phoneno,
-            certificateno: _data.phoneno,
-            startTime: _data.visitstarttime,
-            endTime: _data.visitendtime,
-            purpose: _data.extend2
-          }
-          this.visitorDetail = {
-            visitorName: _data.visitorname, // 姓名
-            visitorSex: String(_data.gender), // 性别
-            visitorPhoneNo: _data.visitoridphone, // 手机号
-            visitorPlateNo: _data.plateno, // 车牌号
-            visitorIdentityNum: _data.visitoridno // 证件号码
-          }
-        } else {
-          this.$toast('系统繁忙，请重新查询')
-        }
+    transfer() {
+      this.$router.push({
+        path: `/transfer`
       })
-    },
-    /**
-     * @description 提交审核结果
-     */
-    sure() {
-      const data = {
-        id: this.visitorId,
-        visitBatch: this.visitBatch,
-        confirmtype: Number(this.result),
-        rejectReason: this.message
-      }
-      API.confirmVisitorReservationApi(data).then(res => {
-        if (['0', '00'].includes(res.code)) {
-          this.overlayShow = false
-          this.status = Number(this.result)
-          this.message = ''
-          this.result = ''
-          this.$router.push({
-            path: '/'
-          })
-        } else {
-          this.$toast('系统繁忙，请稍后再试')
-        }
-      })
-    },
-    /**
-     * @description 审核状态转换
-     */
-    statusClass(val) {
-      let className = ''
-      switch (val) {
-        case 0:
-          className = 'default'
-          break
-        case 1:
-          className = 'success'
-          break
-        case 2:
-          className = 'danger'
-          break
-        default:
-          className = 'default'
-          break
-      }
-      return className
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.visitorDetail {
-  .status {
-    position: relative;
-    left: 20px;
-    font-size: 12px;
-    display: inline-block;
-    padding: 2px 10px;
-    border-radius: 20px;
-    &.default {
-      color: #fff;
-      background: rgba(0, 72, 255, 1);
-    }
-    &.success {
-      color: #fff;
-      background: #07c160;
-    }
-    &.danger {
-      color: rgba(16, 16, 16, 1);
-      background: rgba(220, 222, 224, 1);
-    }
-  }
+.container-box {
+  font-size: 16px !important;
+  height: 100%;
+  padding: 60px 20px 20px 20px;
+  background: #439057;
+  box-sizing: border-box;
 }
-.visitor-card {
-  position: relative;
-  padding: 15px 0 8px;
-  border-radius: 12px;
-  overflow: hidden;
+.card-box {
   background: #fff;
-  margin-bottom: 10px;
+  border-radius: 4px;
+  height: 100%;
 }
-::v-deep .van-button--info {
-  background: linear-gradient(to right, rgba(102, 145, 255, 1), rgba(0, 72, 255, 1));
-  border-color: rgba(102, 145, 255, 1);
+.card-top {
+  height: 105px;
+  border-bottom: 1px dashed #ccc;
 }
-.content {
-  padding: 20px 10px;
+.top-item {
+  text-align: center;
+  width: 90px;
+}
+.top-center {
+  text-align: center;
+  font-size: 14px;
+  position: relative;
+  top: -18px;
+}
+.card-bottom {
+  padding-top: 40px;
+  text-align: center;
+}
+.red-txt {
+  color: red;
+  padding-top: 5px;
+}
+.img-box {
+  width: 75%;
+}
+.bottom-txt {
+  text-align: center;
+  font-size: 14px;
+  color: #ccc;
+  line-height: 30px;
+  position: relative;
+  top: -10px;
+}
+.van-button--small {
+  font-size: 14px !important;
+}
+// flex布局
+.display-flex {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+}
+// .display-flex > *{
+//   display: block;
+// }
+.display-inline-flex {
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: -webkit-inline-flex;
+  display: inline-flex;
+}
+.display-inline-flex > * {
+  display: block;
+}
+/*伸缩流方向*/
+.flex-direction-column {
+  -webkit-box-orient: vertical;
+  -ms-flex-direction: column;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+}
+/*主轴对齐*/
+.justify-content-flex-center {
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+}
+.justify-content-flex-end {
+  -webkit-box-pack: end;
+  -ms-flex-pack: end;
+  -webkit-justify-content: flex-end;
+  justify-content: flex-end;
+}
+.justify-content-flex-justify {
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+}
+/*侧轴对齐*/
+.align-items-flex-start {
+  -webkit-box-align: start;
+  -ms-flex-align: start;
+  -webkit-align-items: flex-start;
+  align-items: flex-start;
+}
+.align-items-flex-end {
+  -webkit-box-align: end;
+  -ms-flex-align: end;
+  -webkit-align-items: flex-end;
+  align-items: flex-end;
+}
+.align-items-center {
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+}
+.align-items-baseline {
+  -webkit-box-align: baseline;
+  -ms-flex-align: baseline;
+  -webkit-align-items: baseline;
+  align-items: baseline;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+/*伸缩性*/
+.flex-auto {
+  -webkit-box-flex: 1;
+  -ms-flex: auto;
+  -webkit-flex: auto;
+  flex: auto;
+}
+.flex-1 {
+  width: 0;
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  -webkit-flex: 1;
+  flex: 1;
 }
 </style>

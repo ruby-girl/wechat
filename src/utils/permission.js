@@ -47,12 +47,15 @@ router.beforeEach(async (to, from, next) => {
       API.getWxTokenApi(params)
         .then(res => {
           console.info('获取opendid==',res)
+          
           if (res.code ==200) {
             // 获取openId之后存储，并将状态更改为2
-            setStore(CONFIG_STORAGE.openId, res.data)
+            setStore(CONFIG_STORAGE.openId, res.data.openId)
+            console.info('res.data.openId==',res.data.openId)
+            setStore(CONFIG_STORAGE.accessToken, res.data.accessToken)
             setStore(CONFIG_STORAGE.AuthStatusKey, 2)
             // 对路由重定向
-            window.location.href = `${window.location.origin}${window.location.pathname}/${window.location.hash}`
+             window.location.href = `${window.location.origin}${window.location.pathname}/${window.location.hash}`
           } else {
             setStore(CONFIG_STORAGE.AuthStatusKey, 0)
           }
@@ -67,6 +70,7 @@ router.beforeEach(async (to, from, next) => {
       // 若openId缺失，状态置为0，去首页重新授权
       if (!getStore(CONFIG_STORAGE.openId)) {
         setStore(CONFIG_STORAGE.AuthStatusKey, 0)
+        console.info('有')
         next('/')
       } else {
         next()
