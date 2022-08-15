@@ -26,8 +26,8 @@
         <div v-else style="margin-bottom: 40px">
           <van-button round type="primary" @click="getCodeImg" :loading="loading">点击获取二维码</van-button>
         </div>
-        <div class="bottom-txt">每分钟自动更新，此付款通过余额支付</div>
-        <div class="bottom-txt">支付成功后，刷新页面查看余额</div>
+        <div class="bottom-txt">二维码有效期为一分钟，此付款通过余额支付</div>
+        <div class="bottom-txt">支付成功后，自动刷新余额</div>
       </div>
     </div>
   </div>
@@ -48,7 +48,8 @@ export default {
       timer: null,
       hasImg: false,
       memberAssetQuantity: '',
-      loading:false
+      loading: false,
+      memberCode: ''
     }
   },
   created() {
@@ -64,17 +65,35 @@ export default {
   },
   methods: {
     getCodeImg() {
-      this.loading=true
+      this.loading = true
       API.memberCodeImg({ openId: getStore(CONFIG_STORAGE.openId) }).then(res => {
-        this.loading=false
+        this.loading = false
         if (res.code == '200') {
           this.qrCodeImg = res.data.qrCodeImg
+          this.memberCode = res.data.memberCode
           this.barCodeIMg = res.data.barCodeIMg
           this.hasImg = true
+          this.$nextTick(()=>{
+            this.getRes()
+          })
           let _this = this
+          
           this.timer = window.setTimeout(() => {
             _this.hasImg = false
-          }, 10000)
+          }, 60000)
+        }
+      })
+    },
+    getRes() {
+      API.getMemberPayRusult({ memberCode: this.memberCode }).then(res => {
+        if (res.data.code == '200') {
+          this.memberAssetQuantity = res.data.memberAssetQuantity
+          this.$toast.success('余额已更新')
+          this.hasImg = false
+        } else {
+          if(this.hasImg&&res.data.code=='204'){
+            this.getRes()
+          }
         }
       })
     },

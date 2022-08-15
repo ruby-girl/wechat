@@ -13,7 +13,9 @@ import { CONFIG_STORAGE } from '@/utils/configs'
 import API from '@/api'
 
 // 设置APPID
-const WX_APPID = 'wxe3c11c4385c75914'
+const WX_APPID = 'wxccca87b44c35bba7'
+
+// const WX_APPID = 'wx48566e1e2e9fb332'//测试号
 wechatAuth.setAppId(WX_APPID)
 
 router.beforeEach(async (to, from, next) => {

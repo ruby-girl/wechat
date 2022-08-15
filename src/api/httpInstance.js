@@ -3,7 +3,7 @@ import { Toast } from 'vant'
 import { REQUEST_SUCCESS } from '@/constant'
 
 const http = axios.create({
-  timeout: 20000,
+  timeout: 26000,
   withCredentials: true,
   headers: { 'X-Requested-With': 'XMLHttpRequest' }
 })

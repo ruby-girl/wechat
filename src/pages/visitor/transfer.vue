@@ -2,8 +2,8 @@
   <layout>
     <div class="visitor">
       <van-form @submit="onSubmit">
-        <van-field label="对方手机号" type="number" v-model="form.otherMemberPhone" center required placeholder="请输入手机号" :border="true" />
-        <van-field label="转账金额" type="number" v-model="form.assetDetailQuantity" center required placeholder="请输入转账金额" :border="true" />
+        <van-field label="对方手机号"  maxlength="11" type="number" v-model="form.otherMemberPhone" center required placeholder="请输入手机号" :border="true" />
+        <van-field label="转账金额" maxlength="10" @input="form.assetDetailQuantity=oninput(form.assetDetailQuantity,2)" type="number" v-model="form.assetDetailQuantity" center required placeholder="请输入转账金额" :border="true" />
 
         
           <van-button style="margin-top:25px" :loading="loading" round block type="primary" native-type="submit">确定转账</van-button>
@@ -17,7 +17,7 @@
 import layout from '@/layouts/layout'
 import API from '@/api'
 import { CONFIG_STORAGE } from '@/utils/configs'
-import { getStore } from '@/utils/util'
+import { getStore,oninput } from '@/utils/util'
 export default {
   data() {
     return {
@@ -34,12 +34,17 @@ export default {
   },
   created() {},
   methods: {
+    oninput,
     onSubmit() {
         if(!this.form.otherMemberPhone||!this.form.assetDetailQuantity){
             this.$toast('输入的信息不完整')
             return
         }
-
+        let num=parseFloat(this.form.assetDetailQuantity)
+        if(num<0||num==0){
+          this.$toast('转账金额须大于0')
+            return
+        }
         API.memberTransfer(this.form).then(res=>{
             this.loading=false
             if(res.code==200){

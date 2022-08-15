@@ -8,7 +8,6 @@
           <van-field v-model="sms" type="number" center required clearable label="验证码" placeholder="请输入验证码" :border="true" use-button-slot>
             <van-button slot="button" size="small" type="primary" native-type="button" @click="gainCode">{{ time }}</van-button>
           </van-field>
-          <van-field label="年龄" type="number" v-model="form.memberAge" center required placeholder="请输入年龄" :border="true" />
           <!-- <van-field
             icon-prefix="iconfont"
             left-icon="shijian"
@@ -69,7 +68,6 @@ export default {
         memberPhone: '', // 电话
         memberName: '', // 姓名
         code: '', //验证码
-        memberAge: '',
         visitendtime: '',
         openId:getStore(CONFIG_STORAGE.openId)
       },
@@ -167,7 +165,7 @@ export default {
      * @description 提交预约信息
      */
     onSubmit() {
-      if (!this.form.memberName || !this.form.memberPhone || !this.sms || !this.form.memberAge) {
+      if (!this.form.memberName || !this.form.memberPhone || !this.sms) {
         this.$toast('输入的信息不完整')
         return
       }
@@ -180,7 +178,7 @@ export default {
           this.$router.push({
             path: '/visitorDetail'
           })
-          this.$toast.success('预约成功')
+          this.$toast.success('绑定成功')
         } else {
           this.$toast(res.msg)
           

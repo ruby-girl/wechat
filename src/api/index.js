@@ -10,13 +10,14 @@ const API = {
   GET_CODE_IMG:'/member/info/memberCodeImg',
   GET_TRANSFER:'/member/info/memberTransfer',
   BIND_WECHAT:'/member/info/wechatRegister',
-  GET_INFO:"/member/info/wechatLogin"//获取用户信息
+  GET_INFO:"/member/info/wechatLogin",//获取用户信息
+  GET_PAY_RUSULT:"/member/info/memberPayRusult"//二维码是否已被扫
 }
 
 const isDev = process.env.NODE_ENV === 'development'
 
 Object.keys(API).forEach(key => {
-  API[key] = `${isDev ? '/dev' : '/' + process.env.VUE_APP_CONTEXT}${API[key]}`
+  API[key] = `${isDev ? '/dev' : '/wechat-api' + process.env.VUE_APP_CONTEXT}${API[key]}`
 })
 
 const ApiService = {
@@ -119,6 +120,13 @@ const ApiService = {
         params
       })
     // }
+  },
+  getMemberPayRusult(data){
+    return http({
+      method: 'post',
+      url: API.GET_PAY_RUSULT,
+      data
+    })
   }
 }
 

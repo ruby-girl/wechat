@@ -394,3 +394,21 @@ export function VueDebounce(fnName, time) {
     }, time)
   }
 }
+export function oninput(val,limit = 0) {
+  val = val.replace(/[^\d.]/g, ""); //保留数字
+  val = val.replace(/^00/, "0."); //开头不能有两个0
+  val = val.replace(/^\./g, "0."); //开头为小数点转换为0.
+  val = val.replace(/\.{2,}/g, "."); //两个以上的小数点转换成一个
+  val = val.replace(".", "$#$").replace(/\./g, "").replace("$#$", "."); //只保留一个小数点
+  /^0\d+/.test(val) ? val = val.slice(1) : ''; //两位以上数字开头不能为0
+  const str = '^(\\d+)\\.(\\d{' + limit + '}).*$'
+  const reg = new RegExp(str)
+  if (limit === 0) {
+      // 不需要小数点
+      val= val.replace(reg, '$1')
+  } else {
+      // 通过正则保留小数点后指定的位数
+      val= val.replace(reg, '$1.$2')
+  }
+  return val
+}

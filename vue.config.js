@@ -40,7 +40,7 @@ module.exports = {
     // },
     proxy: {
       '^/dev/': {
-        target: 'http://6d103b01.cpolar.io/',
+        target: 'http://k7lmptr8xldi.ngrok.xiaomiqiu123.top/',
         changeOrigin: true,
         pathRewrite: {
           '/dev': '/' + process.env.VUE_APP_CONTEXT
